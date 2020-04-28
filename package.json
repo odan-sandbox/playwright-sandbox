@@ -24,5 +24,10 @@
     "test:build": "yarn build --noEmit",
     "test:jest": "yarn jest --detectOpenHandles --forceExit",
     "test:lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
+  },
+  "dependencies": {
+    "@types/pixelmatch": "^5.2.1",
+    "pixelmatch": "^5.2.0",
+    "playwright": "^0.15.0"
   }
 }
