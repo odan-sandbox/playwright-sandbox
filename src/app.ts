@@ -1,23 +1,10 @@
-import playwright from "playwright";
-
-async function walk(
-  browserName: string,
-  browser: playwright.Browser
-): Promise<void> {
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  await page.goto("https://google.com");
-
-  await page.screenshot({ path: `google-${browserName}.png`, fullPage: true });
-  await browser.close();
-}
+import { Capturer } from "./capturer";
 
 async function main(): Promise<void> {
-  const browsers = [playwright.chromium, playwright.firefox, playwright.webkit];
+  const capturer = new Capturer();
+  await capturer.init();
 
-  for await (const browser of browsers) {
-    await walk(browser.name(), await browser.launch());
-  }
+  capturer.capture("https://google.com");
 }
 
 main();
