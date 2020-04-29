@@ -1,6 +1,6 @@
 import fs from "fs";
 import { parse } from "url";
-import path from "path";
+import { join } from "path";
 
 import playwright from "playwright";
 
@@ -12,7 +12,6 @@ export class Capturer {
   private readonly browsers: {
     [name: string]: playwright.BrowserType<playwright.Browser>;
   } = {};
-  private readonly contexts: { [name: string]: playwright.BrowserContext } = {};
   private initialized = false;
   private options: Required<CapturerOptions>;
   constructor(options?: CapturerOptions) {
@@ -21,25 +20,32 @@ export class Capturer {
     };
   }
 
-  public async capture(url: string): Promise<void> {
+  public async capture(url: string): Promise<string[]> {
     if (!this.initialized) {
       throw new Error("should be call init");
     }
 
+    const paths: string[] = [];
     const hostname = parse(url).hostname;
 
     for await (const name of Object.keys(this.browsers)) {
       const browserType = this.browsers[name];
       const browser = await browserType.launch();
       const page = await browser.newPage();
+
+      const path = join(this.options.directory, `${hostname}-${name}.png`);
+      paths.push(path);
+
       await page.goto(url);
       await page.screenshot({
-        path: path.join(this.options.directory, `${hostname}-${name}.png`),
+        path,
         fullPage: true,
       });
 
       await browser.close();
     }
+
+    return paths;
   }
 
   public async init(): Promise<void> {
@@ -64,5 +70,9 @@ export class Capturer {
     });
 
     this.initialized = true;
+  }
+
+  public get browserNames(): string[] {
+    return Object.keys(this.browsers);
   }
 }
